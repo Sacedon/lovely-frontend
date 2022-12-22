@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <title>Loan</title>
+</head>
+<body style="background-color: rgb(255, 234, 225);">
+    <div class="container">
+       
+        <div class="content">
+            <div class="head">
+                <h1 class="h1">Loan</h1>
+            </div>
+            <a href="clients.html" class="btn btn-success p-5 float-start"> <i class="fa-solid fa-arrow-left"></i> <i class="fa fa-user"></i> Clients</a>
+            <button class="btn btn-danger float-end p-5 mb-2" data-bs-toggle="modal" data-bs-target="#createLoanModal"> <i class="fa-solid fa-book-open"></i> Add Loan</button>
+
+            <div class="modal fade" id="createLoanModal" tabindex="-1" aria-labelledby="createLoanModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h1 class="modal-title fs-5" id="createLoanModalLabel"> <i class='fa-solid fa-person'></i> Create New Client</h1>
+                      <button type="button" class="btn btn-secondary btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+    
+                      
+    
+                        <div class="mb-3" style="display: inline-flex;">
+                            <label for="ammount">Ammount:</label>
+                            <input type="number" name="ammount" id="ammount" required>
+                        </div>
+
+
+                        <div class="mb-3" style="display: inline-flex;">
+                            <label for="loan_date">Loan Date:</label>
+                            <input type="date" name="loan_date" id="loan_date"  required>
+                        </div>
+
+
+
+                        <div class="mb-3" style="display: inline-flex;">
+                            <label for="due_date">Due Date:</label>
+                            <input type="date" name="due_date" id="due_date"required>
+                        </div>
+
+                        
+                        <div class="mb-3">
+                            <label for="client_id">Client Name:</label>
+                            <select name="client_id" id="client_id" class="">
+                                <option value="">Client's Name</option>
+                            </select>
+                          </div>
+                   
+            
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Close</button>
+                      <a type="button" class="btn btn-secondary" id="save_btn">Add Client</a>
+                    </div>
+                    
+                  </div>
+                </div>
+              </div>
+
+              <!--table-->
+
+              <table class="table table-bordered table-striped text-center">
+                <thead>
+                    <tr>
+                        <th>Ammount</th>
+                        <th>Loan Date</th>
+                        <th>Due Date</th>
+                        <th>Client's Name</th>
+                        <th>Edit</th>
+                    </tr>
+                </thead>
+
+                <tbody id="loan">
+                    
+                </tbody>
+              </table>
+
+        </div>
+    </div>
+</body>
+<script>
+    function getAllLoans() {
+         fetch("http://localhost:8000/api/loans")
+           .then(response=>{
+             if(response.status==200) {
+               response.json()
+                 .then(data=>{
+                  renderLoanTable(data.loan)
+                  
+                 })
+             }
+           })
+       }
+ 
+     function renderLoanTable(loans){
+         const tbody = $("#loan")
+ 
+ 
+         loans.forEach((ln)=>{
+             const tr = $(document.createElement("tr"))
+  
+             tr.append("<td class='text-black'>" + ln.ammount + "</td>")
+             tr.append("<td class='text-black'>" + ln.loan_date + "</td>")
+             tr.append("<td class='text-black'>" + ln.due_date + "</td>")
+             tr.append("<td class='text-black'>" + ln.client_id + "</td>")
+             tr.append("<td class='text-center text-black'><a href='show_loan.html?id=" + ln.id + "' class='btn btn-sm btn-success'><i class='fa-solid fa-user-pen'></i> &nbsp; Edit Loan</a>")
+                                              
+ 
+             tbody.append(tr)
+         })
+     }
+
+     function getLoans() {
+        
+        fetch('http://localhost:8000/api/loans')
+          .then(response=>{
+            if(response.status==200) {
+              response.json()
+              .then(data=>renderLoansSelect(data['loan']))
+            }
+          })
+      }
+     
+    function renderClientsSelect(clients) {
+        const cl = $("#client_id")
+        clients.forEach((a)=>{
+          const opt = $(document.createElement("option"))
+          opt.attr('value',a.id)
+          opt.text(a.fname)
+          cl.append(opt)
+        })
+      }
+ 
+     function prependLoan(ln){
+         const tbody = $("#loan")
+ 
+         const tr = $(document.createElement("tr"))
+   
+         tr.append("<td class='text-bg-primary'>" + ln.ammount + "</td>")
+         tr.append("<td class='text-bg-primary'>" + ln.loan_date + "</td>")
+         tr.append("<td class='text-bg-primary'>" + ln.due_date + "</td>")
+         tr.append("<td class='text-bg-primary'>" + ln.client_id + "</td>")
+         tr.append("<td class='text-bg-primary text-center'><a href='show_loan.html?id=" + ln.id + "' class='btn btn-sm btn-danger'><i class='fa-solid fa-user-pen'></i> &nbsp; Edit Loan</a>")
+            
+         tbody.prepend(tr)
+     }
+ 
+ 
+     function clearForm() {
+         $("#ammount").val()
+         $("#loan_date").val()
+         $("#due_date").val()
+         $("#client_id").val()
+
+
+       
+       }
+ 
+       $(document).ready(()=>{
+         getAllLoans()
+         getClients()
+ 
+         $("#save_btn").click(()=>{
+           const data = {
+          
+             "ammount":$("#ammount").val(),
+             "loan_date":$("#loan_date").val(),
+             "due_date":$("#due_date").val(),
+             "client_id":$("#client_id").val(),
+
+  
+           }
+ 
+           fetch("http://localhost:8000/api/loans",{
+             "credentials": "omit",
+             "method": "POST",
+             "body": JSON.stringify(data),
+             "headers":{
+               'Accept':'application/json',
+               'Content-Type':'application/json'
+             }
+           }).then(response=>{
+             if(response.status==200) {
+               response.json()
+                 .then(data=>prependWork(data))
+             }
+           })
+           
+           clearForm()
+           $("#createLoanModal").modal('hide')
+         })
+       })
+       function timedRefresh(timeoutPeriod) {
+     setTimeout("location.reload(true);",timeoutPeriod);
+ }
+ 
+ function convertDate(dateString) {
+  // Split the date string into its parts
+  const parts = dateString.split('/');
+  // Extract the month, day, and year from the parts array
+  const month = parts[0];
+  const day = parts[1];
+  const year = parts[2];
+  // Create a new date string in the desired format
+  const newDateString = year + '/' + month + '/' + day;
+  return newDateString;
+}
+
+const dateInput = document.getElementById('#loan_date');
+dateInput.addEventListener('change', function() {
+  // Get the value of the input element
+  const dateString = this.value;
+  // Convert the date to the desired format
+  const convertedDate = convertDate(dateString);
+  console.log(convertedDate);
+});
+
+ </script>
+
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <title>Mini Project</title>
+</head>
+<body style="background-color: rgb(255, 234, 225);">
+    <div class="container">
+       
+        <div class="content">
+            <div class="head">
+                <h1 class="h1">Client</h1>
+            </div>
+            <button class="btn btn-danger float-end p-2 mb-2" data-bs-toggle="modal" data-bs-target="#createClientModal"> <i class="fa fa-plus"></i> Add Client</button>
+
+            <div class="modal fade" id="createClientModal" tabindex="-1" aria-labelledby="createClientModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h1 class="modal-title fs-5" id="createClientModalLabel"> <i class='fa-solid fa-person'></i> Create New Client</h1>
+                      <button type="button" class="btn btn-secondary btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+    
+                      
+    
+                        <div class="mb-3" style="display: inline-flex;">
+                            <label for="fname">First Name:</label>
+                            <input type="text" name="fname" id="fname" value="fname" required>
+                        </div>
+
+
+                        <div class="mb-3" style="display: inline-flex;">
+                            <label for="lname">Last Name:</label>
+                            <input type="text" name="lname" id="lname" value="lname" required>
+                        </div>
+
+                        <div class="mb-3" style="display: inline-flex;">
+                            <label for="age">Age:</label>
+                            <input type="number" name="age" id="age" value="age" required>
+                        </div>
+
+
+
+                        <div class="mb-3" style="display: inline-flex;">
+                            <label for="address">Address:</label>
+                            <input type="text" name="address" id="address"required>
+                        </div>
+                   
+            
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Close</button>
+                      
+                      <a type="button" class="btn btn-secondary" id="save_btn">Add Client</a>
+                    </div>
+                    
+                  </div>
+                </div>
+              </div>
+
+              <!--table-->
+
+              <table class="table table-bordered table-striped text-center">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>First Name</th>
+                        <th>last Name</th>
+                        <th>Age</th>
+                        <th>Address</th>
+                        <th>Edit</th>
+                    </tr>
+                </thead>
+
+
+
+
+
+                <tbody id="clients">
+                    
+                </tbody>
+              </table>
+              <a href="loans.html" class="btn btn-success p-5 float-end"> <i class="fa fa-pencil"></i> Create Loan</a>
+        </div>
+    </div>
+</body>
+<script>
+    function getAllClients() {
+         fetch("http://localhost:8000/api/clients")
+           .then(response=>{
+             if(response.status==200) {
+               response.json()
+                 .then(data=>{
+                  renderClientTable(data.clients)
+                  
+                 })
+             }
+           })
+       }
+ 
+     function renderClientTable(clients){
+         const tbody = $("#clients")
+ 
+ 
+         clients.forEach((cl)=>{
+             const tr = $(document.createElement("tr"))
+             tr.append("<td class='text-black'>" + cl.id + "</td>")
+             tr.append("<td class='text-black'>" + cl.fname + "</td>")
+             tr.append("<td class='text-black'>" + cl.lname + "</td>")
+             tr.append("<td class='text-black'>" + cl.age + "</td>")
+             tr.append("<td class='text-black'>" + cl.address + "</td>")
+             tr.append("<td class='text-center text-black'><a href='show_client.html?id=" + cl.id + "' class='btn btn-sm btn-success'><i class='fa-solid fa-user-pen'></i> &nbsp; Edit Client</a>")
+                                              
+ 
+             tbody.append(tr)
+         })
+     }
+ 
+     function prependClient(cl){
+         const tbody = $("#clients")
+ 
+         const tr = $(document.createElement("tr"))
+         tr.append("<td class='text-bg-primary'>" + cl.id + "</td>")
+         tr.append("<td class='text-bg-primary'>" + cl.fname + "</td>")
+         tr.append("<td class='text-bg-primary'>" + cl.lname + "</td>")
+         tr.append("<td class='text-bg-primary'>" + cl.age + "</td>")
+         tr.append("<td class='text-bg-primary'>" + cl.address + "</td>")
+         tr.append("<td class='text-bg-primary text-center'><a href='show_client.html?id=" + cl.id + "' class='btn btn-sm btn-danger'><i class='fa-solid fa-user-pen'></i> &nbsp; Edit Client</a>")
+            
+         tbody.prepend(tr)
+     }
+ 
+ 
+     function clearForm() {
+         $("#fname").val()
+         $("#lname").val()
+         $("#age").vall()
+         $("#address").val()
+
+       
+       }
+ 
+       $(document).ready(()=>{
+         getAllClients()
+ 
+         $("#save_btn").click(()=>{
+           const data = {
+          
+             "fname":$("#fname").val(),
+             "lname":$("#lname").val(),
+             "age":$("#age").val(),
+             "address":$("#address").val(),
+  
+           }
+ 
+           fetch("http://localhost:8000/api/clients",{
+             "credentials": "omit",
+             "method": "POST",
+             "body": JSON.stringify(data),
+             "headers":{
+               'Accept':'application/json',
+               'Content-Type':'application/json'
+             }
+           }).then(response=>{
+             if(response.status==200) {
+               response.json()
+                 .then(data=>prependClient(data))
+             }
+           })
+           
+           clearForm()
+           $("#createClientModal").modal('hide')
+         })
+       })
+       function timedRefresh(timeoutPeriod) {
+     setTimeout("location.reload(true);",timeoutPeriod);
+ }
+ 
+ function convertDate(dateString) {
+  // Split the date string into its parts
+  const parts = dateString.split('/');
+  // Extract the month, day, and year from the parts array
+  const month = parts[0];
+  const day = parts[1];
+  const year = parts[2];
+  // Create a new date string in the desired format
+  const newDateString = year + '/' + month + '/' + day;
+  return newDateString;
+}
+
+const dateInput = document.getElementById('#dob');
+dateInput.addEventListener('change', function() {
+  // Get the value of the input element
+  const dateString = this.value;
+  // Convert the date to the desired format
+  const convertedDate = convertDate(dateString);
+  console.log(convertedDate);
+});
+
+ </script>
+
+</html>
